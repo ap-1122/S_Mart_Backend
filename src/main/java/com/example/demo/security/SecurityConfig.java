@@ -34,6 +34,11 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll() // Login/Register sabke liye open
+                
+                
+             // --- YE LINE ADD KARO ---
+                .requestMatchers("/admin/**").permitAll() // Admin ke saare kaam (Product add karna) ab open hain
+                // -
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

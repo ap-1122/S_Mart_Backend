@@ -33,9 +33,8 @@ public class UserService {
         user.setEmail(req.getEmail());
         user.setUsername(req.getUsername());
         user.setPassword(passwordEncoder.encode(req.getPassword()));
-        user.setAuthProvider("LOCAL"); // Normal registration
 
-     // Pehle hum phone number save nahi kar rahe the, ab kar rahe hain
+        // Pehle hum phone number save nahi kar rahe the, ab kar rahe hain
         user.setPhoneNumber(req.getPhone()); 
         // -------------------------------------------
 
@@ -45,8 +44,6 @@ public class UserService {
 
         return "Registered Successfully!";
     }
-    
-    
 
     // Login Logic
     public String login(LoginRequest req) { // Yahan 'LoginRequest' use ho raha hai
