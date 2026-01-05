@@ -39,6 +39,15 @@ public class SecurityConfig {
              // --- YE LINE ADD KARO ---
                 .requestMatchers("/admin/**").permitAll() // Admin ke saare kaam (Product add karna) ab open hain
                 // -
+             // 2. ✨ NEW: Public Products aur Categories sabke liye khule (Ye missing tha!)
+                .requestMatchers("/public/**").permitAll() 
+                .requestMatchers("/admin/products/categories").permitAll() // Categories dikhane ke liye
+                .requestMatchers("/admin/products/attributes").permitAll() // Dropdown ke liye
+                
+                // 3. ✨ NEW: Images upload karne ke liye (Admin) - Filhal allow kar rahe hain testing ke liye
+                .requestMatchers("/admin/products/**").permitAll()
+                
+                
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

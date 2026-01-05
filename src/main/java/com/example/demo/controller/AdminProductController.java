@@ -35,13 +35,15 @@ public class AdminProductController {
         Product createdProduct = productService.createProductWithVariants(dto);
         return ResponseEntity.ok(createdProduct);
     }
- // --- NEW GET API: Fetch All Categories ---
+      // --- NEW GET API: Fetch All Categories ---
+     // Frontend dropdown isko call karega
     @GetMapping("/categories")
     public ResponseEntity<List<Category>> getAllCategories() {
         return ResponseEntity.ok(categoryRepository.findAll());
     }
     
     // --- NEW GET API: Fetch All Attributes (Color, Size etc.) ---
+     // Frontend attributes list isko call karegi
     @GetMapping("/attributes")
     public ResponseEntity<List<Attribute>> getAllAttributes() {
         return ResponseEntity.ok(attributeRepository.findAll());

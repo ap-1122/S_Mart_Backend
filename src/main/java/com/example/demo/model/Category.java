@@ -20,6 +20,8 @@ public class Category {
     @ManyToOne 
     @JoinColumn(name = "parent_id")
     private Category parent;
+ 
+    private String description;
 
     // Ek category ke niche bahut saari 'Sub-categories' ho sakti hain
     // mappedBy = "parent" ka matlab hai ki ye rishta 'parent' field se juda hai
@@ -47,4 +49,8 @@ public class Category {
     
     public List<Product> getProducts() { return products; }
     public void setProducts(List<Product> products) { this.products = products; }
+    
+ 
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }
