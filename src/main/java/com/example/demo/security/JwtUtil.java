@@ -24,10 +24,20 @@ public class JwtUtil {
         this.expiration = expiration;
     }
 
-    // Ye method missing tha ya galat tha, isliye error aa raha tha
-    public String generateToken(String email) {
+//    // Ye method missing tha ya galat tha, isliye error aa raha tha
+//    public String generateToken(String email) {
+//        return Jwts.builder()
+//                .setSubject(email)
+//                .setIssuedAt(new Date(System.currentTimeMillis()))
+//                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+//                .signWith(key, SignatureAlgorithm.HS256)
+//                .compact();
+//    }
+ // ✅ UPDATE: Role parameter add kiya
+    public String generateToken(String email, String role) {
         return Jwts.builder()
                 .setSubject(email)
+                .claim("role", role) // 👈 Token ke andar Role chupa diya
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key, SignatureAlgorithm.HS256)

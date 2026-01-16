@@ -62,7 +62,9 @@ public class GoogleAuthService {
                 return userRepository.save(newUser);
             });
 
-            return jwtUtil.generateToken(user.getEmail());
+//            return jwtUtil.generateToken(user.getEmail());
+         // GoogleAuthService.java ke andar
+            return jwtUtil.generateToken(user.getEmail(), user.getRole()); // role add kar dena
 
         } catch (Exception e) {
             throw new RuntimeException("Google Authentication Failed: " + e.getMessage());

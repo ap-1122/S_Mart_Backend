@@ -56,6 +56,17 @@ public class ProductService {
         return mapToResponseDto(product);
     }
 
+    // ✅ 4. Search Products (Logic Added Here)
+    public List<ProductResponseDto> searchProducts(String keyword) {
+        // Repository se data mango
+        List<Product> products = productRepository.findByNameContainingIgnoreCase(keyword);
+        
+        // DTO me convert karke wapas bhejo
+        return products.stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
     // --- 🔥 MAIN LOGIC UPDATE: Map Entity to DTO (With Safety Checks) ---
     private ProductResponseDto mapToResponseDto(Product product) {
         ProductResponseDto dto = new ProductResponseDto();
@@ -142,6 +153,172 @@ public class ProductService {
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//activating search bar logic in upper code 
+
+
+//package com.example.demo.service;
+//
+//import com.example.demo.dto.ProductRequestDto;
+//import com.example.demo.dto.ProductResponseDto;
+//import com.example.demo.dto.ProductImageResponseDto;
+//import com.example.demo.dto.VariantResponseDto;
+//import com.example.demo.model.*;
+//import com.example.demo.repository.BrandRepository;
+//import com.example.demo.repository.CategoryRepository;
+//import com.example.demo.repository.ProductRepository;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.stereotype.Service;
+//
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.Map;
+//import java.util.stream.Collectors;
+//
+//@Service
+//public class ProductService {
+//
+//    @Autowired private ProductRepository productRepository;
+//    @Autowired private CategoryRepository categoryRepository;
+//    @Autowired private BrandRepository brandRepository;
+//
+//    // 1. Create Product
+//    public ProductResponseDto createProduct(ProductRequestDto dto) {
+//        Category category = categoryRepository.findById(dto.getCategoryId())
+//                .orElseThrow(() -> new RuntimeException("Category not found"));
+//
+//        Brand brand = brandRepository.findById(dto.getBrandId())
+//                .orElseThrow(() -> new RuntimeException("Brand not found"));
+//
+//        Product product = new Product();
+//        product.setName(dto.getName());
+//        product.setDescription(dto.getDescription());
+//        product.setCategory(category);
+//        product.setBrand(brand);
+//        product.setIsActive(true);
+//
+//        Product savedProduct = productRepository.save(product);
+//        return mapToResponseDto(savedProduct);
+//    }
+//
+//    // 2. Get All Products
+//    public List<ProductResponseDto> getAllProducts() {
+//        return productRepository.findAll().stream()
+//                .map(this::mapToResponseDto)
+//                .collect(Collectors.toList());
+//    }
+//
+//    // 3. Get Product By ID
+//    public ProductResponseDto getProductById(Long id) {
+//        Product product = productRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("Product not found"));
+//        return mapToResponseDto(product);
+//    }
+//
+//    // --- 🔥 MAIN LOGIC UPDATE: Map Entity to DTO (With Safety Checks) ---
+//    private ProductResponseDto mapToResponseDto(Product product) {
+//        ProductResponseDto dto = new ProductResponseDto();
+//        dto.setId(product.getId());
+//        dto.setName(product.getName());
+//        dto.setDescription(product.getDescription());
+//        
+//        // ✅ 1. Manufacturer Info Map karo
+//        dto.setManufacturerInfo(product.getManufacturerInfo());
+//
+//        if (product.getCategory() != null) {
+//            dto.setCategoryName(product.getCategory().getName());
+//        }
+//
+//        if (product.getBrand() != null) {
+//            dto.setBrandName(product.getBrand().getName());
+//        }
+//
+//        // ✅ 2. Map Features (List<Entity> -> List<String>)
+//        // SAFE: Agar features nahi hain (null), to ye code skip ho jayega. No Error.
+//        if (product.getFeatures() != null) {
+//            List<String> featureList = product.getFeatures().stream()
+//                .map(ProductFeature::getFeature) // Tumhare model me 'getFeature()' hai
+//                .collect(Collectors.toList());
+//            dto.setFeatures(featureList);
+//        }
+//
+//        // ✅ 3. Map Specifications (List<Entity> -> Map<String, String>)
+//        // SAFE: Old products me ye null hoga, to koi dikkat nahi.
+//        if (product.getSpecifications() != null) {
+//            Map<String, String> specMap = product.getSpecifications().stream()
+//                .collect(Collectors.toMap(
+//                    ProductSpecification::getSpecKey,   // e.g. "Ram"
+//                    ProductSpecification::getSpecValue, // e.g. "8GB"
+//                    (existing, replacement) -> existing // Duplicate key safety
+//                ));
+//            dto.setSpecifications(specMap);
+//        }
+//
+//        // --- Images Mapping ---
+//        if (product.getImages() != null) {
+//            List<ProductImageResponseDto> imgDtos = product.getImages().stream()
+//                .map(img -> {
+//                    ProductImageResponseDto imgDto = new ProductImageResponseDto();
+//                    imgDto.setId(img.getId());
+//                    imgDto.setImageUrl(img.getImageUrl());
+//                    imgDto.setIsPrimary(img.getIsPrimary());
+//                    imgDto.setDisplayOrder(img.getDisplayOrder());
+//                    if(img.getVariant() != null) {
+//                        imgDto.setVariantId(img.getVariant().getId());
+//                    }
+//                    return imgDto;
+//                })
+//                .collect(Collectors.toList());
+//            dto.setImages(imgDtos);
+//        }
+//
+//        // --- Variants Mapping ---
+//        if (product.getVariants() != null) {
+//            List<VariantResponseDto> variantDtos = product.getVariants().stream()
+//                .map(variant -> {
+//                    VariantResponseDto vDto = new VariantResponseDto();
+//                    vDto.setId(variant.getId());
+//                    vDto.setSku(variant.getSku());
+//                    vDto.setPrice(variant.getPrice());
+//                    vDto.setStock(variant.getStock());
+//
+//                    Map<String, String> attrMap = new HashMap<>();
+//                    if (variant.getAttributeValues() != null) {
+//                        for (VariantAttributeValue val : variant.getAttributeValues()) {
+//                            if (val.getAttribute() != null) {
+//                                attrMap.put(val.getAttribute().getName(), val.getValue());
+//                            }
+//                        }
+//                    }
+//                    vDto.setAttributes(attrMap);
+//                    return vDto;
+//                })
+//                .collect(Collectors.toList());
+//            dto.setVariants(variantDtos);
+//        }
+//
+//        return dto;
+//    }
+//}
+//
 
 
 
