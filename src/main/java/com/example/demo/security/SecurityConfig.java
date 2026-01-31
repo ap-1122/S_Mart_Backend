@@ -1,4 +1,4 @@
-package com.example.demo.security;
+ package com.example.demo.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -35,48 +35,56 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 
-                // 1. Pre-flight requests (OPTIONS) allow (Important for React)
+                // 1. Pre-flight requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
-                // 2. PUBLIC ENDPOINTS (No Login Required)
-                .requestMatchers("/api/auth/**", "/auth/**").permitAll() // Login/Register
+                // 2. PUBLIC ENDPOINTS
+                .requestMatchers("/api/auth/**", "/auth/**").permitAll()
 
-                // --- PUBLIC VIEW ACCESS (GET Only) ---
-                // Anyone can view products, categories, brands, variants, attributes
-                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/brands/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/variants/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/attributes/**").permitAll()
+                // --- PUBLIC GET ACCESS ---
+                // Note: "/api/products" AND "/api/products/**" dono zaroori hain
+                .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/categories", "/api/categories/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/brands", "/api/brands/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/variants", "/api/variants/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/attributes", "/api/attributes/**").permitAll()
                 
-                // 3. USER SECURED ENDPOINTS (Login Required)
-                .requestMatchers("/api/cart/**").authenticated()      // Cart Operations
-                .requestMatchers("/api/orders/**").authenticated()    // Place/View Orders
-                .requestMatchers("/api/users/**").authenticated()     // User Profile
-                .requestMatchers("/api/addresses/**").authenticated() // Address Management
+                // 3. USER SECURED
+                .requestMatchers("/api/cart/**").authenticated()
+                .requestMatchers("/api/orders/**").authenticated()
+                .requestMatchers("/api/users/**").authenticated()
+                .requestMatchers("/api/addresses/**").authenticated()
                 
-                // 4. ADMIN & SELLER SECURED ENDPOINTS (Updated)
+                // 4. ADMIN & SELLER (CREATE/UPDATE/DELETE)
+                // Yahan humne path matching strong kar di hai
                 
-                // Product Management (Create/Update/Delete) -> ADMIN & SELLER
-                .requestMatchers(HttpMethod.POST, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
-                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
-                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
+                // Products
+                .requestMatchers(HttpMethod.POST, "/api/products", "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
+                .requestMatchers(HttpMethod.PUT, "/api/products", "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
+                .requestMatchers(HttpMethod.DELETE, "/api/products", "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
                 
-                // Category & Brand Management -> ADMIN ONLY
-                .requestMatchers(HttpMethod.POST, "/api/categories/**").hasAuthority("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/brands/**").hasAuthority("ADMIN")
-                
-                // Variant Management -> ADMIN & SELLER
-                .requestMatchers(HttpMethod.POST, "/api/variants/**").hasAnyAuthority("ADMIN", "SELLER")
-                
-                // Attribute Management -> ADMIN ONLY
-                .requestMatchers(HttpMethod.POST, "/api/attributes/**").hasAuthority("ADMIN")
-                
-                // Image Upload -> ADMIN & SELLER
+                // Images
                 .requestMatchers("/api/product-images/**").hasAnyAuthority("ADMIN", "SELLER")
+
+                // Variants
+                .requestMatchers(HttpMethod.POST, "/api/variants", "/api/variants/**").hasAnyAuthority("ADMIN", "SELLER")
                 
-                // Future Admin Routes -> ADMIN ONLY
-                .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                // Categories & Brands (Admin Only)
+                .requestMatchers(HttpMethod.POST, "/api/categories", "/api/categories/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/categories", "/api/categories/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/categories", "/api/categories/**").hasAuthority("ADMIN")
+
+                .requestMatchers(HttpMethod.POST, "/api/brands", "/api/brands/**").hasAuthority("ADMIN")
+                
+                // Attributes
+                .requestMatchers(HttpMethod.POST, "/api/attributes", "/api/attributes/**").hasAuthority("ADMIN")
+                
+                // Webhook
+                .requestMatchers(HttpMethod.POST, "/api/payment/webhook").permitAll()
+                
+                // Admin User Mgmt
+                .requestMatchers("/api/users/all").hasAuthority("ADMIN")
+                .requestMatchers("/api/users/*/role").hasAuthority("ADMIN")
                 
                 // 5. CATCH ALL
                 .anyRequest().authenticated()
@@ -89,7 +97,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Allow your Frontend URL
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "*"));
@@ -108,6 +115,130 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 }
+
+
+
+
+// baki sab sahi hai per kuch dikkat hai jisse product add nahi ho pa raha 
+
+//package com.example.demo.security;
+//
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Configuration;
+//import org.springframework.http.HttpMethod;
+//import org.springframework.security.authentication.AuthenticationManager;
+//import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+//import org.springframework.security.config.http.SessionCreationPolicy;
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+//import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.security.web.SecurityFilterChain;
+//import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+//import org.springframework.web.cors.CorsConfiguration;
+//import org.springframework.web.cors.CorsConfigurationSource;
+//import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+//import java.util.Arrays;
+//
+//@Configuration
+//public class SecurityConfig {
+//
+//    private final JwtFilter jwtFilter;
+//
+//    @Autowired
+//    public SecurityConfig(JwtFilter jwtFilter) {
+//        this.jwtFilter = jwtFilter;
+//    }
+//
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+//            .csrf(csrf -> csrf.disable())
+//            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//            .authorizeHttpRequests(auth -> auth
+//                
+//                // 1. Pre-flight requests (OPTIONS) allow (Important for React)
+//                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+//                
+//                // 2. PUBLIC ENDPOINTS (No Login Required)
+//                .requestMatchers("/api/auth/**", "/auth/**").permitAll() // Login/Register
+//
+//                // --- PUBLIC VIEW ACCESS (GET Only) ---
+//                // Anyone can view products, categories, brands, variants, attributes
+//                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+//                .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+//                .requestMatchers(HttpMethod.GET, "/api/brands/**").permitAll()
+//                .requestMatchers(HttpMethod.GET, "/api/variants/**").permitAll()
+//                .requestMatchers(HttpMethod.GET, "/api/attributes/**").permitAll()
+//                
+//                // 3. USER SECURED ENDPOINTS (Login Required)
+//                .requestMatchers("/api/cart/**").authenticated()      // Cart Operations
+//                .requestMatchers("/api/orders/**").authenticated()    // Place/View Orders
+//                .requestMatchers("/api/users/**").authenticated()     // User Profile
+//                .requestMatchers("/api/addresses/**").authenticated() // Address Management
+//                
+//                // 4. ADMIN & SELLER SECURED ENDPOINTS (Updated)
+//                
+//                // Product Management (Create/Update/Delete) -> ADMIN & SELLER
+//                .requestMatchers(HttpMethod.POST, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
+//                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
+//                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
+//                
+//                // Category & Brand Management -> ADMIN ONLY
+//                .requestMatchers(HttpMethod.POST, "/api/categories/**").hasAuthority("ADMIN")
+//                .requestMatchers(HttpMethod.POST, "/api/brands/**").hasAuthority("ADMIN")
+//                
+//                // Variant Management -> ADMIN & SELLER
+//                .requestMatchers(HttpMethod.POST, "/api/variants/**").hasAnyAuthority("ADMIN", "SELLER")
+//                
+//                // Attribute Management -> ADMIN ONLY
+//                .requestMatchers(HttpMethod.POST, "/api/attributes/**").hasAuthority("ADMIN")
+//                
+//                // Image Upload -> ADMIN & SELLER
+//                .requestMatchers("/api/product-images/**").hasAnyAuthority("ADMIN", "SELLER")
+//                
+//                // Future Admin Routes -> ADMIN ONLY
+//                .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+//                
+//             // ✅ Payment Webhook ko Public karo (Razorpay bina login ke call karega)
+//                .requestMatchers(HttpMethod.POST, "/api/payment/webhook").permitAll()
+//                
+//                
+//             // ✅ NEW: Admin User Management
+//                .requestMatchers("/api/users/all").hasAuthority("ADMIN")
+//                .requestMatchers("/api/users/*/role").hasAuthority("ADMIN")
+//                
+//                // 5. CATCH ALL
+//                .anyRequest().authenticated()
+//            )
+//            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+//
+//        return http.build();
+//    }
+//
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        // Allow your Frontend URL
+//        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); 
+//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "*"));
+//        configuration.setAllowCredentials(true);
+//        
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
+//
+//    @Bean
+//    public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
+//
+//    @Bean
+//    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+//        return config.getAuthenticationManager();
+//    }
+//}
 
 
 
