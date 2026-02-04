@@ -55,6 +55,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/users/**").authenticated()
                 .requestMatchers("/api/addresses/**").authenticated()
                 
+             // ✅ NEW: Subscription Access (Sirf Logged-in User ke liye)
+                .requestMatchers("/api/subscription/**").authenticated()
                 // 4. ADMIN & SELLER (CREATE/UPDATE/DELETE)
                 // Yahan humne path matching strong kar di hai
                 
@@ -85,6 +87,8 @@ public class SecurityConfig {
                 // Admin User Mgmt
                 .requestMatchers("/api/users/all").hasAuthority("ADMIN")
                 .requestMatchers("/api/users/*/role").hasAuthority("ADMIN")
+                
+            
                 
                 // 5. CATCH ALL
                 .anyRequest().authenticated()
