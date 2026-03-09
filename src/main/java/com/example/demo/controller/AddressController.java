@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/addresses")
-@CrossOrigin(origins = "http://localhost:5173") // React URL
+//@CrossOrigin(origins = "http://localhost:5173") // React URL
 public class AddressController {
 
     @Autowired

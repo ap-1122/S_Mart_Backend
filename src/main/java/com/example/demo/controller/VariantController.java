@@ -12,7 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/variants")
 //👇👇👇 YE LINE JODNA SABSE ZAROORI HAI (Isse 403 Error hat jayega)
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+//@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class VariantController {
 
     @Autowired
